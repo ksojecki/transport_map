@@ -1,0 +1,8 @@
+hooks:
+  - event: file.changed
+    actions:
+      - bash: "node scripts/agent-checks.mjs changed"
+
+  - event: session.deleted
+    actions:
+      - bash: "node scripts/agent-checks.mjs full"

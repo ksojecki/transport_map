@@ -4,13 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "husky",
     "setup": "tsx src/setup.ts",
     "test": "node --import tsx --test tests/*.test.ts",
     "build": "node ./node_modules/typescript6/bin/tsc -p tsconfig.json",
     "typecheck": "node ./node_modules/typescript7/bin/tsc --noEmit -p tsconfig.json",
     "lint": "oxlint src tests app.js",
+    "lint-staged": "lint-staged",
     "format:check": "oxfmt --check .",
     "format": "oxfmt .",
+    "check:changed": "node scripts/agent-checks.mjs changed",
+    "check:full": "node scripts/agent-checks.mjs full",
     "start": "node dist/server.js"
   },
   "dependencies": {
@@ -23,11 +27,17 @@
     "@types/better-sqlite3": "9.6.0",
     "@types/node": "24.19.2",
     "@types/unzipper": "0.10.11",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.4",
     "oxfmt": "0.72.0",
     "oxlint": "1.87.0",
     "tsx": "4.23.15",
     "typescript6": "npm:typescript@6.0.3",
     "typescript7": "npm:typescript@7.0.2"
+  },
+  "lint-staged": {
+    "*.{js,cjs,mjs,ts,tsx}": "oxlint",
+    "*.{js,cjs,mjs,ts,tsx,json,jsonc,yml,yaml,css,html,md}": "oxfmt --check"
   },
   "engines": {
     "node": ">=24"

@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "hooks": {
+    "postToolUse": [
+      {
+        "type": "command",
+        "matcher": "edit|write",
+        "bash": "node scripts/agent-checks.mjs changed",
+        "cwd": ".",
+        "timeoutSec": 120
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "node scripts/agent-checks.mjs full",
+        "cwd": ".",
+        "timeoutSec": 1800
+      }
+    ]
+  }
+}
