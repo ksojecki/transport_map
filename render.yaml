@@ -4,7 +4,7 @@ services:
     runtime: node
     region: frankfurt
     plan: free
-    buildCommand: npm ci && npm run setup && npm run build
-    startCommand: npm start
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm run setup && corepack pnpm run build
+    startCommand: corepack pnpm start
     healthCheckPath: /api/health
     autoDeployTrigger: "off"

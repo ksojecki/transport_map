@@ -152,11 +152,11 @@ function runChangedChecks() {
   const formatFiles = changedFiles.filter((file) => formatExtensions.has(path.extname(file)));
 
   if (lintFiles.length > 0) {
-    runOrExit('npm', ['exec', '--', 'oxlint', ...lintFiles]);
+    runOrExit('corepack', ['pnpm', 'exec', 'oxlint', ...lintFiles]);
   }
 
   if (formatFiles.length > 0) {
-    runOrExit('npm', ['exec', '--', 'oxfmt', '--check', ...formatFiles]);
+    runOrExit('corepack', ['pnpm', 'exec', 'oxfmt', '--check', ...formatFiles]);
   }
 
   if (lintFiles.length === 0 && formatFiles.length === 0) {
@@ -165,9 +165,9 @@ function runChangedChecks() {
 }
 
 function runFullChecks() {
-  runOrExit('npm', ['test']);
-  runOrExit('npm', ['run', 'lint']);
-  runOrExit('npm', ['run', 'format:check']);
+  runOrExit('corepack', ['pnpm', 'test']);
+  runOrExit('corepack', ['pnpm', 'run', 'lint']);
+  runOrExit('corepack', ['pnpm', 'run', 'format:check']);
 }
 
 if (mode === 'changed') {

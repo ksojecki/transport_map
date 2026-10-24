@@ -1,6 +1,6 @@
 # Backend API contract
 
-The server is started with `npm start` and serves the existing `index.html` and `app.js` from the repository root. JSON errors use `{ "error": "..." }`.
+The server is started with `pnpm start` and serves the existing `index.html` and `app.js` from the repository root. JSON errors use `{ "error": "..." }`.
 
 - `GET /api/health` → `{ status: "ok", database: "ready" }`
 - `GET /api/addresses/suggest?q=...` (Photon) and `GET /api/addresses/search?q=...` (Nominatim) → `{ results: [{ address, latitude, longitude }] }`. Results are bounded to the Tricity area.
