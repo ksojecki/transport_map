@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "tabWidth": 2,
+  "useTabs": false,
+  "ignorePatterns": [".codex/**", "node_modules/**", "dist/**", "coverage/**"],
+  "overrides": [
+    {
+      "files": ["*.json", "*.jsonc", "*.yml", "*.yaml"],
+      "options": {
+        "tabWidth": 2,
+        "useTabs": false,
+        "singleQuote": false
+      }
+    }
+  ]
+}

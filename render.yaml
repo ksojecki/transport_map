@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: mapa-transportu
+    runtime: node
+    region: frankfurt
+    plan: free
+    buildCommand: npm ci && npm run setup && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: "off"

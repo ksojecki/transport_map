@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Połączenia komunikacji miejskiej</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+      :root {
+        --background: #f3f6fa;
+        --surface: #ffffff;
+        --foreground: #18243b;
+        --muted: #617089;
+        --border: #e0e7f0;
+        --primary: #2563eb;
+        --radius: 12px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        color: var(--foreground);
+        background: var(--background);
+      }
+
+      header {
+        padding: 16px 24px;
+        color: white;
+        background: #142744;
+      }
+
+      header h1 {
+        margin: 0 0 4px;
+        font-size: 21px;
+      }
+
+      header p {
+        margin: 0;
+        font-size: 13px;
+        color: #c6d5eb;
+      }
+
+      main {
+        display: flex;
+        height: calc(100vh - 83px);
+        min-height: 550px;
+      }
+
+      aside {
+        width: 330px;
+        flex-shrink: 0;
+        padding: 20px;
+        background: var(--surface);
+        overflow-y: auto;
+        border-right: 1px solid var(--border);
+        z-index: 1000;
+      }
+
+      #map {
+        flex: 1;
+        min-width: 0;
+      }
+
+      #map .leaflet-tile-pane .leaflet-tile {
+        filter: grayscale(1) brightness(0.8);
+      }
+
+      h2 {
+        margin: 20px 0 12px;
+        font-size: 15px;
+      }
+
+      button {
+        padding: 10px 14px;
+        color: white;
+        background: var(--primary);
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      .line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 0;
+        cursor: pointer;
+      }
+
+      .line-badge {
+        min-width: 42px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        color: white;
+        font-size: 13px;
+        text-align: center;
+        font-weight: 700;
+      }
+
+      .line-type {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      input[type='text'],
+      input[type='date'],
+      input[type='time'],
+      input[type='number'],
+      select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--foreground);
+        background: white;
+      }
+
+      #addressForm {
+        display: grid;
+        gap: 8px;
+      }
+
+      input[type='checkbox'] {
+        accent-color: var(--primary);
+      }
+
+      input[type='range'] {
+        width: 100%;
+      }
+
+      .option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 12px 0;
+        font-size: 13px;
+      }
+
+      .status {
+        margin: 12px 0;
+        padding: 12px;
+        border-radius: 8px;
+        background: #edf5ff;
+        color: #25446c;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .status.error {
+        background: #fff0f0;
+        color: #a02323;
+      }
+
+      .stat {
+        padding: 14px;
+        margin-top: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 28px;
+      }
+
+      .stat span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .hint {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .map-legend {
+        display: grid;
+        gap: 7px;
+        margin: 8px 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .legend-sample {
+        display: inline-block;
+        width: 28px;
+        height: 0;
+        margin-right: 6px;
+        vertical-align: middle;
+        border-top: 3px solid;
+      }
+      .legend-sample.direct {
+        border-color: #2563eb;
+      }
+      .legend-sample.transfer {
+        border-color: #dc4753;
+        border-top-style: dashed;
+      }
+      .legend-sample.contour {
+        border-color: #111827;
+        box-shadow: 0 0 0 2px #fff;
+      }
+      .legend-sample.origin-walk {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #16a34a;
+        border-radius: 50%;
+        background: #16a34a;
+      }
+      .legend-gradient {
+        display: inline-block;
+        width: 54px;
+        height: 10px;
+        margin-right: 6px;
+        vertical-align: middle;
+        border-radius: 5px;
+        background: linear-gradient(90deg, #16a34a, #dc2626);
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+      }
+
+      @media (max-width: 750px) {
+        main {
+          flex-direction: column;
+          height: auto;
+        }
+
+        aside {
+          width: 100%;
+          max-height: 45vh;
+        }
+
+        #map {
+          height: 65vh;
+          min-height: 450px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Połączenia komunikacji miejskiej</h1>
+      <p>Rozkładowe połączenia od wskazanego adresu</p>
+    </header>
+
+    <main>
+      <aside>
+        <h2>Punkt początkowy</h2>
+        <form id="addressForm">
+          <label class="hint" for="addressInput">Adres w Trójmieście i okolicach</label>
+          <input
+            id="addressInput"
+            type="text"
+            autocomplete="street-address"
+            list="addressSuggestions"
+            required
+            placeholder="np. Jana z Kolna 1"
+          />
+          <datalist id="addressSuggestions"></datalist>
+          <button id="addressSubmit" type="submit">Ustaw adres</button>
+        </form>
+        <label class="option" for="savedAddresses"
+          >Zapisane adresy
+          <select id="savedAddresses" aria-label="Wybierz zapisany adres">
+            <option value="">Wybierz zapisany adres</option>
+          </select>
+        </label>
+        <p id="addressStatus" class="status" role="status" aria-live="polite">
+          Podaj adres i wybierz „Ustaw adres”.
+        </p>
+        <p class="hint">
+          Wyszukiwanie adresów obejmuje Trójmiasto i okoliczne gminy. Mapa: © OpenStreetMap
+          contributors.
+        </p>
+
+        <details open>
+          <summary>Podróż</summary>
+          <label class="option" for="travelDate">Data <input id="travelDate" type="date" /></label>
+          <label class="option" for="travelTime"
+            >Godzina <input id="travelTime" type="time"
+          /></label>
+          <label class="option" for="journeyLimit"
+            >Limit podróży (<output id="journeyLimitValue" for="journeyLimit">20 min</output>)
+            <input id="journeyLimit" type="range" min="0" max="90" step="1" value="20"
+          /></label>
+        </details>
+        <details>
+          <summary>Dojście pieszo i przesiadka</summary>
+          <label class="option" for="walkMinutes"
+            >Dojście pieszo (<output id="walkMinutesValue" for="walkMinutes"
+              >5 min · do 360 m</output
+            >) <input id="walkMinutes" type="range" min="0" max="15" step="1" value="5"
+          /></label>
+          <label class="option" for="minimumTransfer"
+            >Min. czas przesiadki (<output id="minimumTransferValue" for="minimumTransfer"
+              >2 min</output
+            >) <input id="minimumTransfer" type="range" min="0" max="5" step="1" value="2"
+          /></label>
+          <p class="hint">
+            Limit obejmuje dojście z adresu, oczekiwanie, przejazdy i przesiadki. Dojście liczone
+            jest po linii prostej z prędkością 1,2 m/s; przesiadka może wymagać do 2 min dojścia
+            (maks. 144 m), doliczanych do minimalnego czasu przesiadki.
+          </p>
+        </details>
+        <p class="hint">
+          Ten sam czas dojścia określa dojście od adresu i maksymalny zasięg dojścia od przystanków
+          do celu. Promień okręgu może być mniejszy, aby dojście do celu zmieściło się w limicie
+          podróży.
+        </p>
+
+        <h2>Wyniki</h2>
+
+        <div id="status" class="status">Ustaw adres i oblicz połączenia.</div>
+
+        <button id="reload" type="button">Oblicz połączenia</button>
+
+        <hr />
+
+        <h2>Połączenia na mapie</h2>
+
+        <label class="option">
+          <input id="includeTransfers" type="checkbox" checked />
+          Uwzględnij przesiadki
+        </label>
+
+        <div class="map-legend" aria-label="Legenda mapy">
+          <span>Podkład mapy jest czarno-biały; kolorowe okręgi pokazują zasięg.</span>
+          <span
+            ><i class="legend-gradient"></i>Czas podróży: 0 min (zielony) — 90 min (czerwony)</span
+          >
+          <span
+            ><i class="legend-sample origin-walk"></i>Zasięg dojścia od adresu początkowego</span
+          >
+          <span><i class="legend-sample contour"></i>Kontury: 10, 20… min dojazdu</span>
+          <span
+            >Bez zaznaczenia: tylko połączenia bezpośrednie, ich zasięg i przystanki
+            początkowe.</span
+          >
+          <span>Zaznaczenie pokazuje także połączenia i zasięg z przesiadką.</span>
+          <span><i class="legend-sample direct"></i>Linia ciągła: przejazd bezpośredni</span>
+          <span><i class="legend-sample transfer"></i>Linia przerywana: przejazd z przesiadką</span>
+          <span>Fioletowa kropkowana linia: dojście pieszo między przystankami</span>
+          <span
+            >Większy ciemny punkt: adres lub przystanek początkowy; większy czerwony punkt: miejsce
+            przesiadki</span
+          >
+        </div>
+
+        <div class="stat">
+          <strong id="directCount">–</strong>
+          <span>Przystanki z najszybszą trasą bezpośrednią</span>
+        </div>
+
+        <div class="stat">
+          <strong id="transferCount">–</strong>
+          <span>Przystanki z najszybszą trasą z przesiadką</span>
+        </div>
+
+        <div class="stat">
+          <strong id="originCount">–</strong>
+          <span> Przystanki początkowe w zasięgu dojścia </span>
+        </div>
+
+        <hr />
+
+        <p class="hint">
+          Dojście jest szacowane w linii prostej. Wynik nie uwzględnia przebiegu chodników ani
+          przeszkód.
+        </p>
+
+        <p class="hint">
+          Wyniki wykorzystują dane GTFS, w tym połączenia POLREGIO. Obliczenia uwzględniają
+          kalendarz, możliwość wejścia i wyjścia oraz zadany czas przesiadki.
+        </p>
+        <p class="hint">
+          Dane POLREGIO pochodzą od POLREGIO S.A. (<a
+            href="https://polregio.pl/pl/bip/rozklad-jazdy/"
+            >informacja o rozkładzie jazdy</a
+          >). POLREGIO S.A. nie ponosi odpowiedzialności za ich wykorzystanie.
+        </p>
+      </aside>
+
+      <div id="map"></div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script src="./app.js" defer></script>
+  </body>
+</html>
